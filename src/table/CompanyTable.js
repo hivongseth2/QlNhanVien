@@ -6,11 +6,14 @@ import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table, Dropdown, Menu, Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchApiAllEmployee } from "../redux/EmployeeSlice";
-import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
+import { fetchApiAllCompany } from "../redux/CompanySlice";
+import { useNavigate } from "react-router-dom";
 
-const EmployeeTable = () => {
-  const data = useSelector((state) => state.employee.data);
+// import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
+
+const CompanyTable = () => {
+  const navigation = useNavigate();
+  const data = useSelector((state) => state.companies.data);
   const dispatch = useDispatch();
 
   const [isEdit, setIsEdit] = useState(false);
@@ -30,17 +33,16 @@ const EmployeeTable = () => {
 
   useEffect(() => {}, [editEmployee]);
   const handleDelete = (record) => {
-    console.log("Delete:", record);
+    console.log("Delete:", record.departments);
     // Implement the logic for deleting
+    navigation("/department", { state: record.departments }); // Use the correct route path
   };
-  const uniquePositions = Array.from(
-    new Set(data.map((item) => item?.position))
-  );
+  const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        dispatch(fetchApiAllEmployee());
+        dispatch(fetchApiAllCompany());
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
@@ -179,75 +181,67 @@ const EmployeeTable = () => {
   const columns = [
     {
       title: "#",
-      dataIndex: "personId",
-      key: "personId",
+      dataIndex: "id",
+      key: "id",
       width: "10%",
     },
 
     {
-      title: "Full Name",
-      dataIndex: "fullName",
-      key: "fullName",
+      title: "Company Name",
+      dataIndex: "companyName",
+      key: "companyName",
       width: "15%",
-      ...getColumnSearchProps("fullName"),
+      ...getColumnSearchProps("companyName"),
     },
     {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
+      title: "Address",
+      dataIndex: "companyAddress",
+      key: "companyAddress",
       width: "15%",
-      ...getColumnSearchProps("phone"),
+      ...getColumnSearchProps("companyAddress"),
     },
+
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
       width: "15%",
-      ...getColumnSearchProps("email"),
-    },
-    {
-      title: "position",
-      dataIndex: "position",
-      key: "position",
-      width: "15%",
-      filters: uniquePositions.map((position) => ({
-        text: position,
-        value: position,
+      filters: uniqueTypes.map((type) => ({
+        text: type,
+        value: type,
       })),
-      onFilter: (value, record) => record.position.indexOf(value) === 0,
+      onFilter: (value, record) => record.type.indexOf(value) === 0,
     },
 
     {
-      title: "Department",
-      dataIndex: "department",
-      key: "department.departmentName",
-      ...getColumnSearchProps("department.departmentName"),
-      render: (department) => department && department.departmentName,
-      sorter: (a, b) =>
-        a.department?.departmentName.localeCompare(
-          b.department?.departmentName
-        ),
-      sortDirections: ["descend", "ascend"],
+      title: "Acreage",
+      dataIndex: "acreage",
+      key: "acreage",
+      ...getColumnSearchProps("acreage"),
     },
-
     {
-      title: "Salary",
-      dataIndex: "salary",
-      key: "dsalary",
-      sorter: (a, b) => a.salary.localeCompare(b.salary),
-      sortDirections: ["descend", "ascend"],
+      title: "Build Year",
+      dataIndex: "buildYear",
+      key: "buildYear",
+      ...getColumnSearchProps("buildYear"),
+    },
+    {
+      title: "Year Operation",
+      dataIndex: "yearOperation",
+      key: "yearOperation",
+      ...getColumnSearchProps("yearOperation"),
     },
     {
       title: "Action",
-      dataIndex: "operation",
-      key: "personId",
+      dataIndex: "id",
+      key: "id",
       render: (text, record) => (
         <Space size="middle">
           <Button type="primary" onClick={() => handleEdit(record)}>
             Edit
           </Button>
           <Button danger type="primary" onClick={() => handleDelete(record)}>
-            Delete
+            Department
           </Button>
         </Space>
       ),
@@ -256,15 +250,15 @@ const EmployeeTable = () => {
   return (
     <>
       <Table columns={columns} dataSource={data} />;
-      <Modal
+      {/* <Modal
         title="Edit Employee"
         open={isEdit}
         onOk={handleOk}
         onCancel={handleCancel}
       >
         <EmployeeAddForm editEmployee={editEmployee} />
-      </Modal>
+      </Modal> */}
     </>
   );
 };
-export default EmployeeTable;
+export default CompanyTable;

@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import EmployeeTable from "../../table/EmployeeTable";
 import { Button, Flex, Modal } from "antd";
-import EmployeeAddForm from "./EmoloyeeAddForm";
+import SalaryTable from "../../table/SalaryTable";
 import { useLocation } from "react-router-dom";
+import SalaryAddModal from "./SalaryAddModal";
 
-export default function EmployeeContent() {
+export default function SalaryContent() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const location = useLocation();
   const [departments, setDepartments] = useState(
     location.state && location.state
   );
+  useEffect(() => {
+    // Update the state when the location changes
+    setDepartments(location.state && location.state);
+  }, [location.state]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -23,18 +29,19 @@ export default function EmployeeContent() {
   return (
     <div>
       <Button type="primary" onClick={showModal}>
-        Add Employee
+        Button don't know
       </Button>
 
-      <EmployeeTable />
-
+      {/* <EmployeeTable /> */}
+      <SalaryTable />
       <Modal
-        title="Add Employee"
+        title="Add Salary"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        width={1000} // Adjust the width as per your requirement
       >
-        <EmployeeAddForm />
+        <SalaryAddModal departmentId={departments} />
       </Modal>
     </div>
   );

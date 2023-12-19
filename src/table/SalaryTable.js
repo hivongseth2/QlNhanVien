@@ -6,15 +6,29 @@ import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table, Dropdown, Menu, Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchApiAllEmployee } from "../redux/EmployeeSlice";
-import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
+import { fetchApiAllCompany } from "../redux/CompanySlice";
+import { useNavigate } from "react-router-dom";
+import { fetchApiSalaryDepart } from "../redux/SalarySlice";
+import { useLocation } from "react-router-dom";
 
-const EmployeeTable = () => {
-  const data = useSelector((state) => state.employee.data);
+// import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
+
+const SalaryTable = () => {
+  const navigation = useNavigate();
+  const data = useSelector((state) => state.salaries.data);
   const dispatch = useDispatch();
+  const location = useLocation();
+  const [departments, setDepartments] = useState(
+    location.state && location.state
+  );
 
   const [isEdit, setIsEdit] = useState(false);
   const [editEmployee, setEditEmployee] = useState({});
+
+  useEffect(() => {
+    // Update the state when the location changes
+    setDepartments(location.state && location.state);
+  }, [location.state]);
   //handle
 
   const handleOk = () => {
@@ -24,23 +38,25 @@ const EmployeeTable = () => {
     setIsEdit(false);
   };
   const handleEdit = (record) => {
-    setIsEdit(true);
-    setEditEmployee(record);
+    // setIsEdit(true);
+    // setEditEmployee(record);
+    console.log(record);
   };
+
+  useEffect(() => {
+    console.log("dataSalary123:", data);
+  }, []);
 
   useEffect(() => {}, [editEmployee]);
   const handleDelete = (record) => {
-    console.log("Delete:", record);
-    // Implement the logic for deleting
+    console.log("Delete:", record.departments);
   };
-  const uniquePositions = Array.from(
-    new Set(data.map((item) => item?.position))
-  );
+  //   const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        dispatch(fetchApiAllEmployee());
+        dispatch(fetchApiSalaryDepart(departments));
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
@@ -179,75 +195,85 @@ const EmployeeTable = () => {
   const columns = [
     {
       title: "#",
-      dataIndex: "personId",
-      key: "personId",
-      width: "10%",
+      dataIndex: "idSalary",
+      key: "idSalary",
+      width: "5%",
     },
 
     {
-      title: "Full Name",
-      dataIndex: "fullName",
-      key: "fullName",
+      title: "Employee Name",
+      dataIndex: "employee",
       width: "15%",
-      ...getColumnSearchProps("fullName"),
+      key: "employee.fullName",
+      ...getColumnSearchProps("employee.fullName"),
+
+      render: (employee) => employee && employee.fullName,
     },
     {
       title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-      width: "15%",
-      ...getColumnSearchProps("phone"),
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: "15%",
-      ...getColumnSearchProps("email"),
-    },
-    {
-      title: "position",
-      dataIndex: "position",
-      key: "position",
-      width: "15%",
-      filters: uniquePositions.map((position) => ({
-        text: position,
-        value: position,
-      })),
-      onFilter: (value, record) => record.position.indexOf(value) === 0,
-    },
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.phone",
+      ...getColumnSearchProps("employee.phone"),
 
-    {
-      title: "Department",
-      dataIndex: "department",
-      key: "department.departmentName",
-      ...getColumnSearchProps("department.departmentName"),
-      render: (department) => department && department.departmentName,
-      sorter: (a, b) =>
-        a.department?.departmentName.localeCompare(
-          b.department?.departmentName
-        ),
-      sortDirections: ["descend", "ascend"],
+      render: (employee) => employee && employee.phone,
     },
-
     {
       title: "Salary",
-      dataIndex: "salary",
-      key: "dsalary",
-      sorter: (a, b) => a.salary.localeCompare(b.salary),
-      sortDirections: ["descend", "ascend"],
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.salary",
+      ...getColumnSearchProps("employee.salary"),
+
+      render: (employee) => employee && employee.salary,
+    },
+
+    {
+      title: "Role",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.account.role.roleName",
+      render: (employee) => employee && employee.account.role.roleName,
+      // ...getColumnSearchProps("employee.salary"),
+    },
+    {
+      title: "Department",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.department.departmentName",
+      render: (employee) => employee && employee.department.departmentName,
+      // ...getColumnSearchProps("employee.salary"),
+    },
+    {
+      title: "Month",
+      dataIndex: "date",
+      key: "date",
+      //   ...getColumnSearchProps("date"),
+    },
+
+    {
+      title: "Allow",
+      dataIndex: "allow",
+      key: "allow",
+      ...getColumnSearchProps("allow"),
+    },
+    {
+      title: "Sum",
+      dataIndex: "sum",
+      key: "sum",
+      ...getColumnSearchProps("sum"),
     },
     {
       title: "Action",
-      dataIndex: "operation",
-      key: "personId",
+      dataIndex: "id",
+      key: "id",
       render: (text, record) => (
         <Space size="middle">
           <Button type="primary" onClick={() => handleEdit(record)}>
             Edit
           </Button>
           <Button danger type="primary" onClick={() => handleDelete(record)}>
-            Delete
+            Department
           </Button>
         </Space>
       ),
@@ -256,15 +282,15 @@ const EmployeeTable = () => {
   return (
     <>
       <Table columns={columns} dataSource={data} />;
-      <Modal
+      {/* <Modal
         title="Edit Employee"
         open={isEdit}
         onOk={handleOk}
         onCancel={handleCancel}
       >
         <EmployeeAddForm editEmployee={editEmployee} />
-      </Modal>
+      </Modal> */}
     </>
   );
 };
-export default EmployeeTable;
+export default SalaryTable;

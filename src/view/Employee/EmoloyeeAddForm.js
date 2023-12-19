@@ -1,53 +1,62 @@
-import { Button, Input, Select, Form, Radio } from "antd";
+import { Button, Input, Select, Form } from "antd";
 import React, { useEffect, useState } from "react";
-
 import { useSelector, useDispatch } from "react-redux";
 import { fetchApiAllCompany } from "../../redux/CompanySlice";
-
-import { fetchApiAddEmployee } from "../../redux/EmployeeSlice";
-import { customApi } from "../../API/customApi";
+import {
+  fetchApiAddEmployee,
+  fetchApiUpdateEmployee,
+} from "../../redux/EmployeeSlice";
 
 const EmployeeAddForm = ({ editEmployee }) => {
   const companies = useSelector((state) => state.companies.data);
+  const [company, setCompany] = useState({});
   const dispatch = useDispatch();
+  const [formValues, setFormValues] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    department: {},
+    address: "",
+    salary: "",
 
-  const [componentSize, setComponentSize] = useState("default");
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [position, setPosition] = useState("");
-  const [company, setCompany] = useState("");
-  const [departmentId, setDepartmentId] = useState("");
-  const [userName, setUserName] = useState("");
-  const [passWord, setPassWord] = useState("");
-
-  const [departments, setDepartmens] = useState([]);
+    position: "",
+    departmentId: "",
+    userName: "",
+    passWord: "",
+  });
+  const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
-    // Update state variables with editEmployee data
+    console.log("form value", formValues);
+  }, [formValues]);
+
+  useEffect(() => {
     if (editEmployee) {
-      setFullName(editEmployee.fullName || "");
-      setPhone(editEmployee.phone || "");
-      setEmail(editEmployee.email || "");
-      setAddress(editEmployee.address || "");
-      setPosition(editEmployee.position || "");
-      setCompany(editEmployee.company || "");
-      setDepartmentId(editEmployee.departmentId || "");
-      setUserName(editEmployee.userName || "");
-      setPassWord(editEmployee.passWord || "");
-      // Assuming editEmployee.departments is an array
-      // setDepartmentId(editEmployee.departments.departmentName || []);
+      console.log("edit", editEmployee);
+      const { account, ...tempForm } = editEmployee;
+      console.log("temp:", tempForm);
+      tempForm.departmentId = editEmployee?.department?.id || "";
+      tempForm.userName = editEmployee?.account?.userName;
+      tempForm.passWord = editEmployee?.account?.password;
+      setFormValues(tempForm);
     }
+  }, [editEmployee]);
 
-    console.log("edit", editEmployee);
-  }, []);
   useEffect(() => {
-    setDepartmens(company.departments);
-    console.log(company.departments);
-  }, [company]);
+    if (editEmployee) {
+      companies.forEach((item) => {
+        item.departments.forEach((itemDepart) => {
+          if (itemDepart?.id === editEmployee?.department?.id) {
+            setCompany(item);
+          }
+        });
+      });
+    }
+  }, [editEmployee]);
 
-  // fetall
+  useEffect(() => {
+    setDepartments(formValues.company?.departments || company.departments);
+  }, [formValues.company, company]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,21 +67,29 @@ const EmployeeAddForm = ({ editEmployee }) => {
       }
     };
     fetchData();
-    console.log("companies", companies);
   }, [dispatch]);
 
-  const onFormLayoutChange = ({ size }) => {
-    setComponentSize(size);
+  const handleInputChange = (field, value) => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [field]: value,
+    }));
   };
 
-  const handleSubmit = async (values) => {
-    // Handle form submission here
-    values = { ...values, status: 1, roleId: 1 };
-
+  const handleSubmit = async () => {
     try {
-      const resultAction = await dispatch(fetchApiAddEmployee(values));
-      const newEmployee = resultAction.payload;
-      console.log("Fulfilled payload:", newEmployee);
+      formValues.roleId = 1;
+      formValues.departmentId = formValues.department.id;
+      const { company, department, ...dataTrans } = formValues;
+
+      if (editEmployee) {
+        const resultAction = await dispatch(fetchApiUpdateEmployee(dataTrans));
+      } else {
+        const resultAction = await dispatch(fetchApiAddEmployee(dataTrans));
+      }
+
+      // const newEmployee = resultAction.payload;
+      // console.log("Fulfilled payload:", newEmployee);
     } catch (e) {
       console.log(e);
     }
@@ -87,83 +104,98 @@ const EmployeeAddForm = ({ editEmployee }) => {
         span: 14,
       }}
       layout="horizontal"
-      initialValues={{
-        size: componentSize,
-      }}
-      onValuesChange={onFormLayoutChange}
-      size={componentSize}
       onFinish={handleSubmit}
       style={{
         maxWidth: 600,
       }}
     >
-      {/* <Form.Item label="Form Size" name="size">
-        <Radio.Group>
-          <Radio.Button value="small">Small</Radio.Button>
-          <Radio.Button value="default">Default</Radio.Button>
-          <Radio.Button value="large">Large</Radio.Button>
-        </Radio.Group>
-      </Form.Item> */}
-
-      <Form.Item label="Full Name" name="fullName" initialValue={fullName}>
-        <Input onChange={(e) => setFullName(e.target.value)} />
+      <Form.Item label="Full Name">
+        <Input
+          value={formValues.fullName}
+          onChange={(e) => handleInputChange("fullName", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="Phone" name="phone" initialValue={phone}>
-        <Input onChange={(e) => setPhone(e.target.value)} />
+      <Form.Item label="Phone">
+        <Input
+          value={formValues.phone}
+          onChange={(e) => handleInputChange("phone", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="Email" name="email" initialValue={email}>
-        <Input onChange={(e) => setEmail(e.target.value)} />
+      <Form.Item label="Email">
+        <Input
+          value={formValues.email}
+          onChange={(e) => handleInputChange("email", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="Address" name="address" initialValue={address}>
-        <Input onChange={(e) => setAddress(e.target.value)} />
+      <Form.Item label="Address">
+        <Input
+          value={formValues.address}
+          onChange={(e) => handleInputChange("address", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="Position" name="position" initialValue={position}>
-        <Input onChange={(e) => setPosition(e.target.value)} />
+      <Form.Item label="Position">
+        <Input
+          value={formValues.position}
+          onChange={(e) => handleInputChange("position", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="Company" name="company" initialValue={company}>
+      <Form.Item label="Salary">
+        <Input
+          value={formValues.salary}
+          onChange={(e) => handleInputChange("salary", e.target.value)}
+        />
+      </Form.Item>
+
+      <Form.Item label="Company">
         <Select
+          value={company.companyName}
           onChange={(value, option) => {
+            handleInputChange("company", option.data);
             setCompany(option.data);
-            console.log(option.data);
           }}
         >
-          {companies.map((item) => {
-            return (
-              <Select.Option value={item.id} data={item} key={item.id}>
-                {item.companyName}
-              </Select.Option>
-            );
-          })}
+          {companies.map((item) => (
+            <Select.Option value={item.id} data={item} key={item.id}>
+              {item.companyName}
+            </Select.Option>
+          ))}
         </Select>
       </Form.Item>
 
-      <Form.Item
-        label="Department"
-        name="departmentId"
-        initialValue={departmentId}
-      >
-        <Select onChange={(value) => setDepartmentId(value)}>
-          {departments?.map((item) => {
-            return (
+      {(formValues.company || company) && (
+        <Form.Item label="Department">
+          <Select
+            value={formValues?.department?.departmentName}
+            onChange={(value, option) =>
+              handleInputChange("department", option.data)
+            }
+          >
+            {departments?.map((item) => (
               <Select.Option value={item.id} data={item} key={item.id}>
                 {item.departmentName}
               </Select.Option>
-            );
-          })}
-        </Select>
+            ))}
+          </Select>
+        </Form.Item>
+      )}
+
+      <Form.Item label="User Name">
+        <Input
+          value={formValues.userName}
+          onChange={(e) => handleInputChange("userName", e.target.value)}
+        />
       </Form.Item>
 
-      <Form.Item label="User Name" name="userName" initialValue={userName}>
-        <Input onChange={(e) => setUserName(e.target.value)} />
-      </Form.Item>
-
-      <Form.Item label="Password" name="passWord" initialValue={passWord}>
-        <Input onChange={(e) => setPassWord(e.target.value)} />
+      <Form.Item label="Password">
+        <Input.Password
+          value={formValues.passWord}
+          onChange={(e) => handleInputChange("passWord", e.target.value)}
+        />
       </Form.Item>
 
       <Button type="primary" htmlType="submit">

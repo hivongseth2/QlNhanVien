@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 import EmployeeTable from "../../table/EmployeeTable";
 import { Button, Flex, Modal } from "antd";
-import EmployeeAddForm from "./EmoloyeeAddForm";
-import { useLocation } from "react-router-dom";
+// import EmployeeAddForm from "./EmoloyeeAddForm";
+import CompanyTable from "../../table/CompanyTable";
 
-export default function EmployeeContent() {
-  const location = useLocation();
-  const [departments, setDepartments] = useState(
-    location.state && location.state
-  );
-
+export default function CompanyContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
@@ -23,19 +18,19 @@ export default function EmployeeContent() {
   return (
     <div>
       <Button type="primary" onClick={showModal}>
-        Add Employee
+        Add Company
       </Button>
 
-      <EmployeeTable />
+      <CompanyTable />
 
-      <Modal
+      {/* <Modal
         title="Add Employee"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
       >
         <EmployeeAddForm />
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
