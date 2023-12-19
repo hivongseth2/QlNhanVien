@@ -12,6 +12,7 @@ import CompanyContent from "./Company/CompanyContent";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import DepartmentContent from "./Department/DepartmentContent";
 import SalaryContent from "./Salary/SalaryContent";
+import LoginPage from "./Login/Login";
 
 const { Header, Content, Sider } = Layout;
 
@@ -52,7 +53,7 @@ const HomePage = () => {
   } = theme.useToken();
 
   return (
-    <Router>
+    <>
       <Layout>
         <Header
           style={{
@@ -113,6 +114,7 @@ const HomePage = () => {
                 <Route path="/employee" element={<EmployeeContent />} />
                 <Route path="/Department" element={<DepartmentContent />} />
                 <Route path="/salary" element={<SalaryContent />} />
+                <Route path="/login" element={<LoginPage />} />
 
                 {/* Add more routes for other content */}
               </Routes>
@@ -120,7 +122,7 @@ const HomePage = () => {
           </Layout>
         </Layout>
       </Layout>
-    </Router>
+    </>
   );
 };
 

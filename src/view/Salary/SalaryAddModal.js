@@ -12,14 +12,16 @@ import {
   fetchApiUpdateEmployee,
 } from "../../redux/EmployeeSlice";
 import { customApi } from "../../API/customApi";
+import axios from "axios";
 
 const SalaryAddModal = ({ departmentId }) => {
   const [employees, setEmployees] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [days, setDays] = useState("");
-  const [allow, setAllow] = useState("");
+  const [days, setDays] = useState(0);
+  const [allow, setAllow] = useState(0);
   const [selectedDate, setSelectedDate] = useState(null);
-
+  const [total, setTotal] = useState(0);
+  const [tempSalary, setTempSalary] = useState(0);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,20 +39,26 @@ const SalaryAddModal = ({ departmentId }) => {
   }, [departmentId]);
   const handleDateChange = (date, dateString) => {
     console.log(date, dateString); // You can use dateString in your logic
-    setSelectedDate(date);
+
+    // console.log("datee", date.$d.toISOString());
+    setSelectedDate(date.$d.toISOString());
   };
 
   const handleRowClick = (record) => {
     setSelectedRow(selectedRow === record ? null : record);
     // console.log(selectedRow, "select");
+    setTempSalary(record.salary);
     console.log("red", record);
-    setDays("");
-    setAllow("");
+    setTotal(0);
+    setDays(0);
+    setAllow(0);
   };
   const handleExpandIconClick = (record) => {
     setSelectedRow(selectedRow === record ? null : record);
-    setDays("");
-    setAllow("");
+    setTempSalary(record.salary);
+    setTotal(0);
+    setDays(0);
+    setAllow(0);
   };
   const handleDaysChange = (e) => {
     setDays(e.target.value);
@@ -60,12 +68,37 @@ const SalaryAddModal = ({ departmentId }) => {
     setAllow(e.target.value);
   };
 
-  const handleAddSalary = () => {
-    console.log("Days:", days);
-    console.log("Allow:", allow);
-    setDays("");
-    setAllow("");
+  const handleAddSalary = async () => {
+    console.log(allow, days, selectedDate, total);
+
+    // try {
+    //   const res = await customApi("employee/add", "POST", values);
+
+    //   if (res.data.statusCode === 200 || res.data.statusCode === 201) {
+    //     // toast.success("Thêm khu vực thành công.");
+    //     console.log("res", res);
+    //   }
+    //   console.log("res", res);
+    //   return res.data;
+    // } catch (error) {
+    //   // toast.error("Khu vực đã tồn tại!");
+    //   console.log({ error });
+    // }
+
+    setTempSalary(0);
+    setTotal(0);
+    setDays(0);
+    setAllow(0);
   };
+
+  useEffect(() => {
+    if (allow && days > 0) {
+      let newSalary = parseFloat(tempSalary) + parseFloat(allow);
+
+      const totalTemp = (newSalary / 26) * parseInt(days);
+      setTotal(totalTemp.toFixed(2));
+    }
+  }, [days, allow]);
 
   const handleSubmit = async () => {
     // try {
@@ -82,6 +115,8 @@ const SalaryAddModal = ({ departmentId }) => {
     // } catch (e) {
     //   console.log(e);
     // }
+
+    console.log(allow, days, allow, total);
   };
 
   const [searchText, setSearchText] = useState("");
@@ -282,10 +317,10 @@ const SalaryAddModal = ({ departmentId }) => {
           />
 
           <p>{`Total = (salary + allow) / 26 * days = (${
-            selectedRow.salary ? selectedRow.salary : "salary"
-          } + ${allow ? allow : "allow"} ) / 26 * ${
-            days ? days : "days"
-          } = `}</p>
+            selectedRow && selectedRow.salary ? selectedRow.salary : "salary"
+          } + ${allow}) / 26 * ${days} = ${total}
+          `}</p>
+
           <Button type="primary" onClick={handleAddSalary}>
             Confirm
           </Button>
@@ -308,6 +343,8 @@ const SalaryAddModal = ({ departmentId }) => {
             onClick={(e) => {
               onExpand(record, e);
               e.stopPropagation();
+              console.log(record);
+              handleRowClick(record);
             }}
             icon={expanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
           />
