@@ -9,12 +9,22 @@ import { Breadcrumb, Dropdown, Layout, Menu, Space, theme } from "antd";
 import EmployeeTable from "../table/EmployeeTable";
 import EmployeeContent from "./Employee/EmployeeContent";
 import CompanyContent from "./Company/CompanyContent";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import DepartmentContent from "./Department/DepartmentContent";
 import SalaryContent from "./Salary/SalaryContent";
 import LoginPage from "./Login/Login";
 import TakeOffContent from "./TakeOff/TakeOffContent";
 import { useAuth } from "../../src/AuthContext.js/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserLogin, logoutSlice } from "../redux/AuthSlice";
+import NotFound from "./NotFound/NotFound";
+import { toast } from "react-toastify";
 
 const { Header, Content, Sider } = Layout;
 
@@ -22,15 +32,6 @@ const items1 = ["Company"].map((key) => ({
   key,
   label: `${key}`,
 }));
-
-const items = [
-  {
-    label: "Log out",
-    key: "1",
-    icon: <LogoutOutlined />,
-    danger: true,
-  },
-];
 
 const items2 = ["Company", "Employee", "Salary", "On leave"].map(
   (label, index) => {
@@ -50,8 +51,38 @@ const items2 = ["Company", "Employee", "Salary", "On leave"].map(
 );
 
 const HomePage = () => {
-  const { user, logout } = useAuth();
-  console.log("oday", user);
+  const dispatch = useDispatch();
+  const navigation = useNavigate();
+  const user = useSelector((state) => state.user.data);
+
+  useEffect(() => {
+    dispatch(getUserLogin());
+  }, []);
+
+  useEffect(() => {
+    if (user === null) {
+      navigation("/login");
+    }
+  }, [user]);
+
+  const items = [
+    {
+      label: "Log out",
+      key: "1",
+      icon: <LogoutOutlined />,
+      danger: true,
+      onClick: async () => {
+        try {
+          await dispatch(logoutSlice());
+          await dispatch(getUserLogin());
+          toast.success("Logout successful");
+        } catch (error) {
+          console.error("Error during logout:", error);
+          toast.error("Logout failed. Please try again.");
+        }
+      },
+    },
+  ];
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -105,31 +136,35 @@ const HomePage = () => {
               }}
             >
               <Menu.Item key="1">
-                <Link to="manager/company">Company</Link>
+                <Link to="company">Company</Link>
               </Menu.Item>
               <Menu.Item key="2">
-                <Link to="manager/employee">Employee</Link>
+                <Link to="employee">Employee</Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
             <Content>
               <Routes>
-                <Route path="manager/company" element={<CompanyContent />} />
-                <Route path="manager/employee" element={<EmployeeContent />} />
+                <Route path="company" element={<CompanyContent />} />
+                <Route path="employee" element={<EmployeeContent />} exact />
                 <Route
-                  path="manager/company/Department"
+                  path="company/Department"
                   element={<DepartmentContent />}
+                  exact
                 />
                 <Route
-                  path="manager/company/salary"
+                  path="company/salary"
                   element={<SalaryContent />}
+                  exact
                 />
 
                 <Route
-                  path="manager/company/takeoff"
+                  path="company/takeoff"
                   element={<TakeOffContent />}
+                  exact
                 />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Content>
           </Layout>

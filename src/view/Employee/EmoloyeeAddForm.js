@@ -6,6 +6,7 @@ import {
   fetchApiAddEmployee,
   fetchApiUpdateEmployee,
 } from "../../redux/EmployeeSlice";
+import { toast } from "react-toastify";
 
 const EmployeeAddForm = ({ editEmployee }) => {
   const companies = useSelector((state) => state.companies.data);
@@ -82,16 +83,25 @@ const EmployeeAddForm = ({ editEmployee }) => {
       formValues.departmentId = formValues.department.id;
       const { company, department, ...dataTrans } = formValues;
 
+      let resultAction;
+
       if (editEmployee) {
-        const resultAction = await dispatch(fetchApiUpdateEmployee(dataTrans));
+        resultAction = await dispatch(fetchApiUpdateEmployee(dataTrans));
       } else {
-        const resultAction = await dispatch(fetchApiAddEmployee(dataTrans));
+        resultAction = await dispatch(fetchApiAddEmployee(dataTrans));
       }
 
-      // const newEmployee = resultAction.payload;
-      // console.log("Fulfilled payload:", newEmployee);
-    } catch (e) {
-      console.log(e);
+      const newEmployee = resultAction.payload;
+
+      toast.success(
+        editEmployee
+          ? "Employee updated successfully!"
+          : "Employee added successfully!"
+      );
+    } catch (error) {
+      console.error("Error during form submission:", error);
+
+      toast.error("Form submission failed. Please try again.");
     }
   };
 

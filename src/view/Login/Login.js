@@ -1,20 +1,46 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, Input, Button, Card } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useAuth, AuthProvider } from "../../AuthContext.js/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchApiLogin, getUserLogin } from "../../redux/AuthSlice";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
+  const navigation = useNavigate();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const { isLoggedIn, login } = useAuth();
+  const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.user.data);
+  useEffect(() => {
+    dispatch(getUserLogin());
+  }, []);
 
   const onFinish = (values) => {
     console.log("Received values:", values);
   };
+  useEffect(() => {
+    if (user) {
+      navigation("/manager/company");
+    }
+  }, [user]);
+  const handleLogin = async () => {
+    try {
+      const data = { userName, password };
+      const loggedInUser = await dispatch(fetchApiLogin(data));
 
-  const handleLogin = () => {
-    // Call the login function with the userName and password state values
-    login(userName, password);
+      if (!loggedInUser.error) {
+        localStorage.setItem("user", JSON.stringify(loggedInUser.payload));
+        toast.success("Login successful!"); // Display success toast
+      } else {
+        toast.error("Login failed. Please check your credentials."); // Display error toast
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast.error("Login failed. An error occurred."); // Display error toast
+    }
   };
 
   return (
@@ -26,7 +52,7 @@ const LoginPage = () => {
         height: "100vh",
       }}
     >
-      {!isLoggedIn && (
+      {!user && (
         <Card title="Login" style={{ width: 300 }}>
           <Form
             name="loginForm"

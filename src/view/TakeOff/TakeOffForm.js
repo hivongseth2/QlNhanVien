@@ -3,6 +3,7 @@ import { Form, Input, Select, DatePicker, Button } from "antd";
 import { customApi } from "../../API/customApi";
 import { fetchApiAddTakeOff } from "../../redux/TakeOffSlice";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const { Item } = Form;
 const { Option } = Select;
@@ -21,17 +22,12 @@ const TakeOffForm = ({ departmentId }) => {
     // Perform any further processing with the form values
   };
 
-  console.log("department id", departmentId);
-
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     setPosition(person?.account?.role.roleName);
   }, [person]);
 
-  useEffect(() => {
-    console.log(employees);
-  }, [employees]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,21 +43,28 @@ const TakeOffForm = ({ departmentId }) => {
 
     fetchData();
   }, [departmentId]);
+  const submitForm = async () => {
+    try {
+      const data = {
+        personId: person.personId,
+        quantity: days,
+        takeOffDate: fromDate.$d.toISOString(),
+        reason: reason,
+        state: "pending",
+        departmentId: departmentId,
+        submitDate: new Date().toISOString(),
+      };
 
-  const submitForm = () => {
-    const data = {
-      personId: person.personId,
-      quantity: days,
-      takeOffDate: fromDate.$d.toISOString(),
-      reason: reason,
-      state: "pending",
-      departmentId: departmentId,
-      submitDate: new Date().toISOString(),
-    };
-    console.log("data", data);
-    // customApi("takeoff/add", "POST", data);
+      const resultAction = await dispatch(fetchApiAddTakeOff(data));
 
-    dispatch(fetchApiAddTakeOff(data));
+      if (!resultAction.error) {
+        toast.success("Take-off request submitted successfully!");
+      } else {
+        toast.error("Failed to submit take-off request. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during take-off submission:", error);
+    }
   };
 
   return (
@@ -92,8 +95,6 @@ const TakeOffForm = ({ departmentId }) => {
                 </Option>
               );
             })}
-
-          {/* Add more employees as needed */}
         </Select>
       </Item>
       <Item label="Position" name="position">

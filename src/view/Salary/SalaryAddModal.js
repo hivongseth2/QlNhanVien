@@ -14,6 +14,7 @@ import {
 import { customApi } from "../../API/customApi";
 import axios from "axios";
 import { fetchApiAddSalary } from "../../redux/SalarySlice";
+import { toast } from "react-toastify";
 
 const SalaryAddModal = ({ departmentId }) => {
   const [employees, setEmployees] = useState([]);
@@ -41,17 +42,12 @@ const SalaryAddModal = ({ departmentId }) => {
     fetchData();
   }, [departmentId]);
   const handleDateChange = (date, dateString) => {
-    console.log(date, dateString); // You can use dateString in your logic
-
-    // console.log("datee", date.$d.toISOString());
     setSelectedDate(date.$d.toISOString());
   };
 
   const handleRowClick = (record) => {
     setSelectedRow(selectedRow === record ? null : record);
-    // console.log(selectedRow, "select");
     setTempSalary(record.salary);
-    console.log("red", record);
     setTotal(0);
     setDays(0);
     setAllow(0);
@@ -72,33 +68,30 @@ const SalaryAddModal = ({ departmentId }) => {
   };
 
   const handleAddSalary = async () => {
-    const form = {
-      employeeId: selectedRow.personId,
-      departmentId: departmentId,
-      date: selectedDate,
-      sum: Number(total),
-      allow: Number(allow),
-    };
-    console.log("form", form);
-    dispatch(fetchApiAddSalary(form));
-    // try {
-    //   const res = await customApi("employee/add", "POST", values);
+    try {
+      const form = {
+        employeeId: selectedRow.personId,
+        departmentId: departmentId,
+        date: selectedDate,
+        sum: Number(total),
+        allow: Number(allow),
+      };
 
-    //   if (res.data.statusCode === 200 || res.data.statusCode === 201) {
-    //     // toast.success("Thêm khu vực thành công.");
-    //     console.log("res", res);
-    //   }
-    //   console.log("res", res);
-    //   return res.data;
-    // } catch (error) {
-    //   // toast.error("Khu vực đã tồn tại!");
-    //   console.log({ error });
-    // }
+      const resultAction = await dispatch(fetchApiAddSalary(form));
 
-    setTempSalary(0);
-    setTotal(0);
-    setDays(0);
-    setAllow(0);
+      if (!resultAction.error) {
+        toast.success("Salary added successfully!");
+
+        setTempSalary(0);
+        setTotal(0);
+        setDays(0);
+        setAllow(0);
+      } else {
+        toast.error("Failed to add salary. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during salary addition:", error);
+    }
   };
 
   useEffect(() => {
@@ -110,24 +103,7 @@ const SalaryAddModal = ({ departmentId }) => {
     }
   }, [days, allow]);
 
-  const handleSubmit = async () => {
-    // try {
-    //   formValues.roleId = 1;
-    //   formValues.departmentId = formValues.department.id;
-    //   const { company, department, ...dataTrans } = formValues;
-    //   if (editEmployee) {
-    //     const resultAction = await dispatch(fetchApiUpdateEmployee(dataTrans));
-    //   } else {
-    //     const resultAction = await dispatch(fetchApiAddEmployee(dataTrans));
-    //   }
-    //   // const newEmployee = resultAction.payload;
-    //   // console.log("Fulfilled payload:", newEmployee);
-    // } catch (e) {
-    //   console.log(e);
-    // }
-
-    console.log(allow, days, allow, total);
-  };
+  const handleSubmit = async () => {};
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -353,7 +329,6 @@ const SalaryAddModal = ({ departmentId }) => {
             onClick={(e) => {
               onExpand(record, e);
               e.stopPropagation();
-              console.log(record);
               handleRowClick(record);
             }}
             icon={expanded ? <CaretDownOutlined /> : <CaretRightOutlined />}

@@ -16,6 +16,7 @@ import {
 import { useLocation } from "react-router-dom";
 import ActionButton from "../Component/ActionButton";
 import TakeOffModal from "../view/TakeOff/TakeOffModal";
+import { toast } from "react-toastify";
 
 // import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
 
@@ -54,7 +55,15 @@ const TakeOffTable = () => {
       state: status,
     };
 
-    dispatch(fetchApiUpdateState(dataUpdate));
+    dispatch(fetchApiUpdateState(dataUpdate))
+      .then(() => {
+        // Display success toast
+        toast.success(`Status updated to ${status} successfully`);
+      })
+      .catch((error) => {
+        // Display error toast
+        toast.error(`Error updating status: ${error.message}`);
+      });
   };
   const handleEdit = (record) => {
     // setIsEdit(true);

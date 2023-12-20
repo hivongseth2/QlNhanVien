@@ -33,7 +33,7 @@ const CompanyTable = () => {
 
   useEffect(() => {}, [editEmployee]);
   const handleDelete = (record) => {
-    console.log("Delete:", record.departments);
+    // console.log("Delete:", record.departments);
     // Implement the logic for deleting
     navigation("department", { state: record.departments }); // Use the correct route path
   };

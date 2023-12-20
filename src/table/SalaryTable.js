@@ -275,21 +275,21 @@ const SalaryTable = () => {
       ),
     },
 
-    {
-      title: "Action",
-      dataIndex: "id",
-      key: "id",
-      render: (text, record) => (
-        <Space size="middle">
-          <Button type="primary" onClick={() => handleEdit(record)}>
-            Edit
-          </Button>
-          <Button danger type="primary" onClick={() => handleDelete(record)}>
-            Department
-          </Button>
-        </Space>
-      ),
-    },
+    // {
+    //   title: "Action",
+    //   dataIndex: "id",
+    //   key: "id",
+    //   render: (text, record) => (
+    //     <Space size="middle">
+    //       <Button type="primary" onClick={() => handleEdit(record)}>
+    //         Edit
+    //       </Button>
+    //       <Button danger type="primary" onClick={() => handleDelete(record)}>
+    //         Department
+    //       </Button>
+    //     </Space>
+    //   ),
+    // },
   ];
   return (
     <>
