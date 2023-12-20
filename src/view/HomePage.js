@@ -13,6 +13,8 @@ import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import DepartmentContent from "./Department/DepartmentContent";
 import SalaryContent from "./Salary/SalaryContent";
 import LoginPage from "./Login/Login";
+import TakeOffContent from "./TakeOff/TakeOffContent";
+import { useAuth } from "../../src/AuthContext.js/AuthContext";
 
 const { Header, Content, Sider } = Layout;
 
@@ -48,6 +50,9 @@ const items2 = ["Company", "Employee", "Salary", "On leave"].map(
 );
 
 const HomePage = () => {
+  const { user, logout } = useAuth();
+  console.log("oday", user);
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -82,7 +87,8 @@ const HomePage = () => {
           >
             <a onClick={(e) => e.preventDefault()}>
               <Space>
-                Nguyen Thanh Luan <UserOutlined />
+                {user && user.fullName}
+                <UserOutlined />
               </Space>
             </a>
           </Dropdown>
@@ -99,24 +105,31 @@ const HomePage = () => {
               }}
             >
               <Menu.Item key="1">
-                <Link to="/company">Company</Link>
+                <Link to="manager/company">Company</Link>
               </Menu.Item>
               <Menu.Item key="2">
-                <Link to="/employee">Employee</Link>
+                <Link to="manager/employee">Employee</Link>
               </Menu.Item>
-              {/* Add more Menu.Items for other content */}
             </Menu>
           </Sider>
           <Layout>
             <Content>
               <Routes>
-                <Route path="/company" element={<CompanyContent />} />
-                <Route path="/employee" element={<EmployeeContent />} />
-                <Route path="/Department" element={<DepartmentContent />} />
-                <Route path="/salary" element={<SalaryContent />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="manager/company" element={<CompanyContent />} />
+                <Route path="manager/employee" element={<EmployeeContent />} />
+                <Route
+                  path="manager/company/Department"
+                  element={<DepartmentContent />}
+                />
+                <Route
+                  path="manager/company/salary"
+                  element={<SalaryContent />}
+                />
 
-                {/* Add more routes for other content */}
+                <Route
+                  path="manager/company/takeoff"
+                  element={<TakeOffContent />}
+                />
               </Routes>
             </Content>
           </Layout>

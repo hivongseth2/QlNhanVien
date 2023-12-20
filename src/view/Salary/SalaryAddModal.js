@@ -13,6 +13,7 @@ import {
 } from "../../redux/EmployeeSlice";
 import { customApi } from "../../API/customApi";
 import axios from "axios";
+import { fetchApiAddSalary } from "../../redux/SalarySlice";
 
 const SalaryAddModal = ({ departmentId }) => {
   const [employees, setEmployees] = useState([]);
@@ -22,6 +23,8 @@ const SalaryAddModal = ({ departmentId }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [total, setTotal] = useState(0);
   const [tempSalary, setTempSalary] = useState(0);
+
+  const dispatch = useDispatch();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -69,8 +72,15 @@ const SalaryAddModal = ({ departmentId }) => {
   };
 
   const handleAddSalary = async () => {
-    console.log(allow, days, selectedDate, total);
-
+    const form = {
+      employeeId: selectedRow.personId,
+      departmentId: departmentId,
+      date: selectedDate,
+      sum: Number(total),
+      allow: Number(allow),
+    };
+    console.log("form", form);
+    dispatch(fetchApiAddSalary(form));
     // try {
     //   const res = await customApi("employee/add", "POST", values);
 
@@ -92,7 +102,7 @@ const SalaryAddModal = ({ departmentId }) => {
   };
 
   useEffect(() => {
-    if (allow && days > 0) {
+    if (days >= 0) {
       let newSalary = parseFloat(tempSalary) + parseFloat(allow);
 
       const totalTemp = (newSalary / 26) * parseInt(days);
@@ -353,7 +363,7 @@ const SalaryAddModal = ({ departmentId }) => {
       onRow={(record) => ({
         onClick: () => handleRowClick(record),
       })}
-      rowKey={(record) => record.personId} // Assuming that 'id' is the unique key for each record
+      rowKey={(record) => record.personId}
     />
   );
 };

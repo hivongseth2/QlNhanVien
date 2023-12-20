@@ -33,6 +33,7 @@ export default function EmployeeContent() {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        footer={null}
       >
         <EmployeeAddForm />
       </Modal>

@@ -3,9 +3,11 @@ import EmployeeTable from "../../table/EmployeeTable";
 import { Button, Flex, Modal } from "antd";
 import SalaryTable from "../../table/SalaryTable";
 import { useLocation } from "react-router-dom";
-import SalaryAddModal from "./SalaryAddModal";
+// import SalaryAddModal from "./SalaryAddModal";
+import TakeOffTable from "../../table/TakeOffTable";
+import TakeOffForm from "./TakeOffForm";
 
-export default function SalaryContent() {
+export default function TakeOffContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const location = useLocation();
@@ -29,20 +31,21 @@ export default function SalaryContent() {
   return (
     <div>
       <Button type="primary" onClick={showModal}>
-        Add salary
+        Add Take Off
       </Button>
 
-      {/* <EmployeeTable /> */}
-      <SalaryTable />
+      <TakeOffTable />
       <Modal
-        title="Add Salary"
+        title="New Take Off Form"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-        width={1000} // Adjust the width as per your requirement
         footer={null}
+        width={1000} // Adjust the width as per your requirement
       >
-        <SalaryAddModal departmentId={departments} />
+        {/* <SalaryAddModal departmentId={departments} /> */}
+
+        <TakeOffForm departmentId={departments} />
       </Modal>
     </div>
   );

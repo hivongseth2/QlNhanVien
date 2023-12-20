@@ -26,13 +26,19 @@ const DepartmentContent = () => {
     console.log("Delete department:", departmentId);
   };
 
-  const handleViewEmployees = (departmentId) => {
+  const handleViewSalaries = (departmentId) => {
     // Implement the logic for viewing employees of the department
-    navigation("/salary", { state: departmentId }); // Use the correct route path
+    navigation("/manager/company/salary", { state: departmentId }); // Use the correct route path
 
     console.log("View employees of department:", departmentId);
   };
 
+  const handleViewTakeOff = (departmentId) => {
+    // Implement the logic for viewing employees of the department
+    navigation("/manager/company/takeoff", { state: departmentId }); // Use the correct route path
+
+    console.log("View employees of department:", departmentId);
+  };
   return (
     <List
       grid={{ gutter: 16, column: 3 }}
@@ -52,8 +58,17 @@ const DepartmentContent = () => {
                 <Button danger onClick={() => handleDelete(department.id)}>
                   Delete
                 </Button>
-                <Button onClick={() => handleViewEmployees(department.id)}>
-                  View Employees
+                <Button
+                  onClick={() => handleViewSalaries(department.id)}
+                  style={{ backgroundColor: "green", color: "white" }}
+                >
+                  Salaries
+                </Button>
+                <Button
+                  onClick={() => handleViewTakeOff(department.id)}
+                  style={{ backgroundColor: "orange", color: "white" }}
+                >
+                  Take Off
                 </Button>
               </Space>
             }

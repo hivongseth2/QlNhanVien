@@ -1,5 +1,6 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { DownOutlined, UserOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
@@ -248,6 +249,8 @@ const SalaryTable = () => {
       title: "Month",
       dataIndex: "date",
       key: "date",
+      render: (date) => moment(date).format("MM/YYYY"),
+
       //   ...getColumnSearchProps("date"),
     },
 
@@ -262,7 +265,16 @@ const SalaryTable = () => {
       dataIndex: "sum",
       key: "sum",
       ...getColumnSearchProps("sum"),
+      render: (text) => (
+        <span>
+          {parseFloat(text).toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </span>
+      ),
     },
+
     {
       title: "Action",
       dataIndex: "id",

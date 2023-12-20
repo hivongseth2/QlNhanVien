@@ -1,5 +1,6 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { DownOutlined, UserOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
@@ -8,43 +9,77 @@ import { Button, Input, Space, Table, Dropdown, Menu, Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchApiAllCompany } from "../redux/CompanySlice";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchApiTakeOffDepart,
+  fetchApiUpdateState,
+} from "../redux/TakeOffSlice";
+import { useLocation } from "react-router-dom";
+import ActionButton from "../Component/ActionButton";
+import TakeOffModal from "../view/TakeOff/TakeOffModal";
 
 // import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
 
-const CompanyTable = () => {
+const TakeOffTable = () => {
   const navigation = useNavigate();
-  const data = useSelector((state) => state.companies.data);
+  const data = useSelector((state) => state.takeoffs.data);
   const dispatch = useDispatch();
+  const location = useLocation();
+  const [departments, setDepartments] = useState(
+    location.state && location.state
+  );
+  const [selectedData, setSelectedData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const [isEdit, setIsEdit] = useState(false);
-  const [editEmployee, setEditEmployee] = useState({});
+  useEffect(() => {
+    // Update the state when the location changes
+    setDepartments(location.state && location.state);
+  }, [location.state]);
   //handle
 
-  const handleOk = () => {
-    setIsEdit(false);
-  };
-  const handleCancel = () => {
-    setIsEdit(false);
-  };
-  const handleEdit = (record) => {
-    setIsEdit(true);
-    setEditEmployee(record);
+  const handleOpenModal = (data) => {
+    setSelectedData(data);
+    setModalVisible(true);
   };
 
-  useEffect(() => {}, [editEmployee]);
+  const handleCloseModal = () => {
+    // setSelectedData(null);
+    setModalVisible(false);
+  };
+
+  const handleStatusChange = (record, status) => {
+    console.log(`Record ID nere: ${record.id}, Status: ${status}`);
+    // Implement your logic here, such as making an API call to update the status
+    const dataUpdate = {
+      id: record.id,
+      state: status,
+    };
+
+    dispatch(fetchApiUpdateState(dataUpdate));
+  };
+  const handleEdit = (record) => {
+    // setIsEdit(true);
+    // setEditEmployee(record);
+    console.log(record);
+  };
+
+  useEffect(() => {
+    console.log(data);
+  }, []);
+  useEffect(() => {
+    console.log("datatakeoff123:", data);
+  }, []);
+
   const handleDelete = (record) => {
     console.log("Delete:", record.departments);
-    // Implement the logic for deleting
-    navigation("department", { state: record.departments }); // Use the correct route path
   };
-  const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
+  //   const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        dispatch(fetchApiAllCompany());
+        dispatch(fetchApiTakeOffDepart(departments));
       } catch (error) {
-        console.error("Error fetching employees:", error);
+        console.error("Error fetching takeoff:", error);
       }
     };
     fetchData();
@@ -64,6 +99,10 @@ const CompanyTable = () => {
   const handleChange = (pagination, filters, sorter) => {
     setFilteredInfo(filters);
     setSortedInfo(sorter);
+  };
+
+  const handleView = (record) => {
+    console.log(record);
   };
   const clearFilters = () => {
     setFilteredInfo({});
@@ -183,53 +222,77 @@ const CompanyTable = () => {
       title: "#",
       dataIndex: "id",
       key: "id",
+      width: "5%",
+    },
+
+    {
+      title: "Employee Name",
+      dataIndex: "employee",
+      width: "15%",
+      key: "employee.fullName",
+      ...getColumnSearchProps("employee.fullName"),
+
+      render: (employee) => employee && employee.fullName,
+    },
+    {
+      title: "Phone",
+      dataIndex: "employee",
       width: "10%",
+      key: "employee.phone",
+      ...getColumnSearchProps("employee.phone"),
+
+      render: (employee) => employee && employee.phone,
+    },
+    {
+      title: "Department",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.department.departmentName",
+      //   ...getColumnSearchProps("department.departmentName"),
+
+      render: (employee) => employee && employee.department?.departmentName,
     },
 
     {
-      title: "Company Name",
-      dataIndex: "companyName",
-      key: "companyName",
-      width: "15%",
-      ...getColumnSearchProps("companyName"),
+      title: "Submit",
+      dataIndex: "dateSubmit",
+      width: "10%",
+      key: "dateSubmit",
+      ...getColumnSearchProps("dateSubmit"),
+      render: (dateSubmit) => moment(dateSubmit).format("DD/MM/YYYY"),
     },
     {
-      title: "Address",
-      dataIndex: "companyAddress",
-      key: "companyAddress",
-      width: "15%",
-      ...getColumnSearchProps("companyAddress"),
+      title: "Date Take Off",
+      dataIndex: "dateTakeOff",
+      width: "10%",
+      key: "dateTakeOff",
+      ...getColumnSearchProps("dateTakeOff"),
+      render: (dateTakeOff) => moment(dateTakeOff).format("DD/MM/YYYY"),
     },
-
     {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      width: "15%",
-      filters: uniqueTypes.map((type) => ({
-        text: type,
-        value: type,
-      })),
-      onFilter: (value, record) => record.type.indexOf(value) === 0,
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
+      //   ...getColumnSearchProps("date"),
     },
 
     {
-      title: "Acreage",
-      dataIndex: "acreage",
-      key: "acreage",
-      ...getColumnSearchProps("acreage"),
+      title: "Reason",
+      dataIndex: "reason",
+      key: "reason",
     },
+
     {
-      title: "Build Year",
-      dataIndex: "buildYear",
-      key: "buildYear",
-      ...getColumnSearchProps("buildYear"),
-    },
-    {
-      title: "Year Operation",
-      dataIndex: "yearOperation",
-      key: "yearOperation",
-      ...getColumnSearchProps("yearOperation"),
+      title: "View",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => handleOpenModal(record)}>
+            View
+          </Button>
+        </Space>
+      ),
     },
     {
       title: "Action",
@@ -237,32 +300,30 @@ const CompanyTable = () => {
       key: "id",
       render: (text, record) => (
         <Space size="middle">
-          {/* <Button type="primary" onClick={() => handleEdit(record)}>
-            Edit
-          </Button> */}
-          <Button
-            style={{ backgroundColor: "green" }}
-            type="primary"
-            onClick={() => handleDelete(record)}
-          >
-            Department
-          </Button>
+          <ActionButton
+            record={record}
+            handleEdit={handleEdit}
+            handleStatusChange={handleStatusChange}
+            state={record.state}
+          />
         </Space>
       ),
     },
   ];
   return (
     <>
-      <Table columns={columns} dataSource={data} />;
-      {/* <Modal
-        title="Edit Employee"
-        open={isEdit}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <EmployeeAddForm editEmployee={editEmployee} />
-      </Modal> */}
+      <Table columns={columns} dataSource={data} />
+      {modalVisible && (
+        <Modal title="Take Off" open={modalVisible} onCancel={handleCloseModal}>
+          <TakeOffModal
+            visible={modalVisible}
+            onCancel={handleCloseModal}
+            data={selectedData}
+            handleStatusChange={handleStatusChange}
+          />
+        </Modal>
+      )}
     </>
   );
 };
-export default CompanyTable;
+export default TakeOffTable;
