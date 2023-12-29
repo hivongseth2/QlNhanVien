@@ -25,7 +25,7 @@ const TakeOffForm = ({ departmentId }) => {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
-    setPosition(person?.account?.role.roleName);
+    setPosition(person?.position);
   }, [person]);
 
   useEffect(() => {
@@ -102,6 +102,7 @@ const TakeOffForm = ({ departmentId }) => {
           placeholder="Enter position"
           onChange={(e) => setPosition(e.target.value)}
         /> */}
+
         {position}
       </Item>
       <Item label="Number of Days Off" name="days">

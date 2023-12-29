@@ -8,12 +8,13 @@ const initialState = {
 };
 
 // fetch api all company
-export const fetchApiSalaryDepart = createAsyncThunk(
-  "salary/getSalaryByDepart",
+
+export const fetchApiSalaryProductDepart = createAsyncThunk(
+  "salaryProduct/getSalaryByDepart",
   async (values) => {
     try {
       const res = await axios.get(
-        `http://localhost:8081/salary/getByDepart?departId=${values}`
+        `http://localhost:8081/salaryProduct/getByDepart?departId=${values}`
       );
       console.log("res all company", res.data);
       return res.data;
@@ -23,11 +24,11 @@ export const fetchApiSalaryDepart = createAsyncThunk(
   }
 );
 
-export const fetchApiAddSalary = createAsyncThunk(
-  "salary/add",
+export const fetchApiAddSalaryProduct = createAsyncThunk(
+  "salaryProduct/add",
   async (values) => {
     try {
-      const res = await customApi("salary/add", "POST", values);
+      const res = await customApi("salaryProduct/add", "POST", values);
 
       if (res.data.statusCode === 200 || res.data.statusCode === 201) {
         // toast.success("Thêm khu vực thành công.");
@@ -48,18 +49,19 @@ export const SalarySlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(fetchApiSalaryDepart.pending, (state, action) => {
+
+      .addCase(fetchApiSalaryProductDepart.pending, (state, action) => {
         state.isLoading = true;
       })
-      .addCase(fetchApiSalaryDepart.fulfilled, (state, action) => {
+      .addCase(fetchApiSalaryProductDepart.fulfilled, (state, action) => {
         state.isLoading = false;
         state.data = action?.payload || [];
       })
-      .addCase(fetchApiSalaryDepart.rejected, (state, action) => {
+      .addCase(fetchApiSalaryProductDepart.rejected, (state, action) => {
         state.isLoading = false;
         console.error("Error fetching companys:", action.error);
       })
-      .addCase(fetchApiAddSalary.fulfilled, (state, action) => {
+      .addCase(fetchApiAddSalaryProduct.fulfilled, (state, action) => {
         // const newEmployee = action.payload;
         state.data = [...state.data, action.payload];
       });

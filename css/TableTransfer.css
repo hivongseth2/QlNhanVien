@@ -1,0 +1,23 @@
+/* TableTransfer.css */
+
+.custom-table {
+    margin-top: 16px; /* Add margin for spacing */
+  }
+  
+  .custom-table-title {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px;
+    background-color: #F0F0F0;
+    color: #26577C; /* Light gray background for titles */
+    border-bottom: 1px solid #e8e8e8; /* Add a bottom border */
+  }
+  
+  .custom-table-left .custom-table-title {
+    color: #1890ff; /* Blue color for left table title */
+  }
+  
+  .custom-table-right .custom-table-title {
+    color: #52c41a; /* Green color for right table title */
+  }
+  

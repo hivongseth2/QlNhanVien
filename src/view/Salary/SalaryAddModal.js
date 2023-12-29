@@ -1,6 +1,6 @@
 import { Button, Input, Select, Form, Space, Table, DatePicker } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { DownOutlined, UserOutlined } from "@ant-design/icons";
+import { DownOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchApiAllCompany } from "../../redux/CompanySlice";
@@ -15,15 +15,13 @@ import { customApi } from "../../API/customApi";
 import axios from "axios";
 import { fetchApiAddSalary } from "../../redux/SalarySlice";
 import { toast } from "react-toastify";
-
-const SalaryAddModal = ({ departmentId }) => {
+import SalaryModalTime from "./SalaryModalTime";
+import SalaryProductModal from "./SalaryProductModal";
+const SalaryAddModal = ({ type, departmentId }) => {
   const [employees, setEmployees] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [days, setDays] = useState(0);
-  const [allow, setAllow] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [total, setTotal] = useState(0);
   const [tempSalary, setTempSalary] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -41,69 +39,10 @@ const SalaryAddModal = ({ departmentId }) => {
 
     fetchData();
   }, [departmentId]);
-  const handleDateChange = (date, dateString) => {
-    setSelectedDate(date.$d.toISOString());
-  };
 
   const handleRowClick = (record) => {
     setSelectedRow(selectedRow === record ? null : record);
-    setTempSalary(record.salary);
-    setTotal(0);
-    setDays(0);
-    setAllow(0);
   };
-  const handleExpandIconClick = (record) => {
-    setSelectedRow(selectedRow === record ? null : record);
-    setTempSalary(record.salary);
-    setTotal(0);
-    setDays(0);
-    setAllow(0);
-  };
-  const handleDaysChange = (e) => {
-    setDays(e.target.value);
-  };
-
-  const handleAllowChange = (e) => {
-    setAllow(e.target.value);
-  };
-
-  const handleAddSalary = async () => {
-    try {
-      const form = {
-        employeeId: selectedRow.personId,
-        departmentId: departmentId,
-        date: selectedDate,
-        sum: Number(total),
-        allow: Number(allow),
-      };
-
-      const resultAction = await dispatch(fetchApiAddSalary(form));
-
-      if (!resultAction.error) {
-        toast.success("Salary added successfully!");
-
-        setTempSalary(0);
-        setTotal(0);
-        setDays(0);
-        setAllow(0);
-      } else {
-        toast.error("Failed to add salary. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during salary addition:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (days >= 0) {
-      let newSalary = parseFloat(tempSalary) + parseFloat(allow);
-
-      const totalTemp = (newSalary / 26) * parseInt(days);
-      setTotal(totalTemp.toFixed(2));
-    }
-  }, [days, allow]);
-
-  const handleSubmit = async () => {};
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -131,6 +70,20 @@ const SalaryAddModal = ({ departmentId }) => {
   const handleReset = (clearFilters) => {
     clearFilters();
     setSearchText("");
+  };
+
+  const handleExpandIconClick = (record) => {
+    setSelectedRow(record);
+
+    setModalVisible(true);
+  };
+
+  const handleModalOk = () => {
+    setModalVisible(false);
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
   };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -269,8 +222,8 @@ const SalaryAddModal = ({ departmentId }) => {
       title: "Role",
       dataIndex: "account",
       width: "15%",
-      key: "account.role.roleName",
-      render: (account) => account && account.role.roleName,
+      key: "account.role.name",
+      render: (account) => account && account.role.name,
       // ...getColumnSearchProps("employee.salary"),
     },
 
@@ -282,64 +235,58 @@ const SalaryAddModal = ({ departmentId }) => {
       render: (department) => department && department.departmentName,
       // ...getColumnSearchProps("employee.salary"),
     },
+
+    {
+      title: "Add",
+      dataIndex: "",
+      key: "",
+      width: "5%",
+
+      render: (person) => (
+        <Button
+          type="text"
+          onClick={() => {
+            console.log("!2312312", person);
+            handleExpandIconClick(person);
+          }}
+          icon={<PlusOutlined />}
+        />
+      ),
+    },
   ];
-  const expandedRowRender = (record) => {
-    return (
-      selectedRow === record && (
-        <div style={{ marginTop: "16px" }}>
-          <DatePicker
-            picker="month"
-            style={{ marginBottom: "8px" }}
-            format="MM-YYYY"
-            placeholder="Select Month"
-            onChange={handleDateChange}
-          />
-          <Input placeholder="Days" value={days} onChange={handleDaysChange} />
-          <Input
-            style={{ margin: "8px 0px" }}
-            placeholder="Allow"
-            value={allow}
-            onChange={handleAllowChange}
-          />
-
-          <p>{`Total = (salary + allow) / 26 * days = (${
-            selectedRow && selectedRow.salary ? selectedRow.salary : "salary"
-          } + ${allow}) / 26 * ${days} = ${total}
-          `}</p>
-
-          <Button type="primary" onClick={handleAddSalary}>
-            Confirm
-          </Button>
-        </div>
-      )
-    );
-  };
 
   return (
-    <Table
-      columns={columns}
-      dataSource={employees}
-      pagination={{ pageSize: 10 }}
-      expandable={{
-        expandedRowRender,
-        onExpand: (_, record) => handleRowClick(record),
-        expandIcon: ({ expanded, onExpand, record }) => (
-          <Button
-            type="text"
-            onClick={(e) => {
-              onExpand(record, e);
-              e.stopPropagation();
-              handleRowClick(record);
-            }}
-            icon={expanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
-          />
-        ),
-      }}
-      onRow={(record) => ({
-        onClick: () => handleRowClick(record),
-      })}
-      rowKey={(record) => record.personId}
-    />
+    <>
+      <Table
+        columns={columns}
+        dataSource={employees}
+        pagination={{ pageSize: 10 }}
+        // onRow={(record) => ({
+        //   onClick: () => handleRowClick(record),
+        // })}
+        rowKey={(record) => record.personId}
+      />
+
+      {type == 1 ? (
+        <SalaryModalTime
+          visible={modalVisible}
+          // handleOk={handleAddSalary}
+
+          departmentId={departmentId}
+          selectedRow={selectedRow}
+          handleCancel={handleModalCancel}
+        />
+      ) : (
+        <SalaryProductModal
+          visible={modalVisible}
+          // handleOk={handleAddSalary}
+
+          departmentId={departmentId}
+          selectedRow={selectedRow}
+          handleCancel={handleModalCancel}
+        />
+      )}
+    </>
   );
 };
 

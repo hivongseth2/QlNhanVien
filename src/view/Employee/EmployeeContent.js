@@ -35,7 +35,7 @@ export default function EmployeeContent() {
         onCancel={handleCancel}
         footer={null}
       >
-        <EmployeeAddForm />
+        <EmployeeAddForm onCancel={handleCancel} />
       </Modal>
     </div>
   );

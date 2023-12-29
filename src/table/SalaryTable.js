@@ -233,8 +233,9 @@ const SalaryTable = () => {
       title: "Role",
       dataIndex: "employee",
       width: "10%",
-      key: "employee.account.role.roleName",
-      render: (employee) => employee && employee.account.role.roleName,
+      key: "employee.account.role.name",
+      render: (employee) => employee && employee.account.role.name,
+      // render: (employee) => employee && employee.account.role.name,
       // ...getColumnSearchProps("employee.salary"),
     },
     {
@@ -293,7 +294,7 @@ const SalaryTable = () => {
   ];
   return (
     <>
-      <Table columns={columns} dataSource={data} />;
+      <Table columns={columns} dataSource={data} />
       {/* <Modal
         title="Edit Employee"
         open={isEdit}

@@ -12,6 +12,9 @@ export const fetchApiLogin = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     try {
       const res = await customApi("auth/login", "POST", values);
+      if (res.data.roleId === 1) {
+        return null;
+      }
       return res.data;
     } catch (error) {
       // Use rejectWithValue to handle errors

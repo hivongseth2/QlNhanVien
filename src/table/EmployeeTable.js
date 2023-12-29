@@ -1,17 +1,23 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { DownOutlined, UserOutlined } from "@ant-design/icons";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table, Dropdown, Menu, Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchApiAllEmployee } from "../redux/EmployeeSlice";
+import {
+  fetchApiAllEmployee,
+  fetchApiUpdateRole,
+} from "../redux/EmployeeSlice";
 import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
+import { getUserLogin, logoutSlice } from "../redux/AuthSlice";
 
 const EmployeeTable = () => {
   const data = useSelector((state) => state.employee.data);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.data);
 
   const [isEdit, setIsEdit] = useState(false);
   const [editEmployee, setEditEmployee] = useState({});
@@ -41,6 +47,7 @@ const EmployeeTable = () => {
     const fetchData = async () => {
       try {
         dispatch(fetchApiAllEmployee());
+        dispatch(getUserLogin());
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
@@ -62,6 +69,35 @@ const EmployeeTable = () => {
   const handleChange = (pagination, filters, sorter) => {
     setFilteredInfo(filters);
     setSortedInfo(sorter);
+  };
+
+  const updateRole = (record) => {
+    let newRoleId = 1;
+    if (record.account.role.roleId === 3) {
+      newRoleId = 3;
+      return;
+    }
+    if (record.account.role.roleId === 1) {
+      newRoleId = 2;
+    }
+    const form = {
+      accountId: record.account.userId,
+      roleId: newRoleId,
+    };
+
+    dispatch(fetchApiUpdateRole(form))
+      .then((result) => {
+        // Check if the update was successful
+        if (!result.error) {
+          toast.success("Role updated successfully");
+        } else {
+          toast.error("Failed to update role. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating role:", error);
+        toast.error("An error occurred while updating role.");
+      });
   };
   const clearFilters = () => {
     setFilteredInfo({});
@@ -181,7 +217,7 @@ const EmployeeTable = () => {
       title: "#",
       dataIndex: "personId",
       key: "personId",
-      width: "10%",
+      width: "5%",
     },
 
     {
@@ -209,7 +245,7 @@ const EmployeeTable = () => {
       title: "position",
       dataIndex: "position",
       key: "position",
-      width: "15%",
+      width: "7%",
       filters: uniquePositions.map((position) => ({
         text: position,
         value: position,
@@ -233,9 +269,16 @@ const EmployeeTable = () => {
     {
       title: "Salary",
       dataIndex: "salary",
-      key: "dsalary",
-      sorter: (a, b) => a.salary.localeCompare(b.salary),
-      sortDirections: ["descend", "ascend"],
+      key: "salary",
+      sorter: (a, b) => a.salary - b.salary,
+      render: (text, record) => (
+        <span>
+          {Number(text).toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </span>
+      ),
     },
     {
       title: "Action",
@@ -243,26 +286,55 @@ const EmployeeTable = () => {
       key: "personId",
       render: (text, record) => (
         <Space size="middle">
+          <Button
+            danger
+            disabled={user?.roleId !== 3} //
+            type="primary"
+            onClick={() => updateRole(record)}
+            style={{
+              color: "#eee",
+              width: "120px",
+              backgroundColor:
+                record.account.role.roleId === 1
+                  ? "orange"
+                  : record.account.role.roleId === 2
+                  ? "#213555"
+                  : "green",
+
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>{`${record.account.role.name}`}</span>
+            {record.account.role.roleId === 2 && (
+              <span style={{ marginLeft: "20px" }}>↓</span>
+            )}
+            {record.account.role.roleId === 1 && (
+              <span style={{ marginLeft: "20px" }}>↑</span>
+            )}
+          </Button>
+
           <Button type="primary" onClick={() => handleEdit(record)}>
             Edit
           </Button>
-          <Button danger type="primary" onClick={() => handleDelete(record)}>
+          {/* <Button danger type="primary" onClick={() => handleDelete(record)}>
             Delete
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
   ];
   return (
     <>
-      <Table columns={columns} dataSource={data} />;
+      <Table columns={columns} dataSource={data} />
       <Modal
         title="Edit Employee"
         open={isEdit}
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <EmployeeAddForm editEmployee={editEmployee} />
+        <EmployeeAddForm editEmployee={editEmployee} onCancel={handleCancel} />
       </Modal>
     </>
   );

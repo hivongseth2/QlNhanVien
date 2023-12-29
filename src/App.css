@@ -13,6 +13,11 @@
   }
 }
 
+Table
+{
+  margin-top: 30px !important ;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

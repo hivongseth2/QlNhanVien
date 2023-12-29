@@ -30,16 +30,25 @@ const LoginPage = () => {
     try {
       const data = { userName, password };
       const loggedInUser = await dispatch(fetchApiLogin(data));
+      console.log("loggedUser", loggedInUser);
 
+      // Handle roleId == 1 separately
+      if (loggedInUser.payload.roleId === 1) {
+        toast.error("Account doesn't have permission");
+        navigation("/login");
+        return; // Return early
+      }
+
+      // Continue with the rest of the code if roleId is not 1
       if (!loggedInUser.error) {
         localStorage.setItem("user", JSON.stringify(loggedInUser.payload));
-        toast.success("Login successful!"); // Display success toast
+        toast.success("Login successful!");
       } else {
-        toast.error("Login failed. Please check your credentials."); // Display error toast
+        toast.error("Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login failed. An error occurred."); // Display error toast
+      toast.error("Login failed. An error occurred.");
     }
   };
 

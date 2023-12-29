@@ -62,6 +62,27 @@ const fetchApiUpdateEmployee = createAsyncThunk(
   }
 );
 
+const fetchApiUpdateRole = createAsyncThunk(
+  "account/update",
+  async (values) => {
+    console.log(values, "========123");
+    if (values.roleId === 3) {
+      return;
+    }
+    try {
+      const res = await customApi(`account/update`, "PUT", values);
+
+      if (res) {
+        console.log("res return bên data", res.data);
+      }
+      return res.data;
+    } catch (error) {
+      // toast.error("Khu vực đã tồn tại!");
+      console.log({ error });
+    }
+  }
+);
+
 const EmployeeSlice = createSlice({
   name: "employee",
   initialState,
@@ -94,9 +115,46 @@ const EmployeeSlice = createSlice({
         if (index !== -1) {
           state.data[index] = updatedEmployee;
         }
+      })
+      .addCase(fetchApiUpdateRole.fulfilled, (state, action) => {
+        // Log the current state
+        console.log("Current State:", JSON.stringify(state, null, 2));
+
+        const updatedEmployee = action.payload;
+
+        const updatedData = state.data.map((employee) => {
+          if (employee.account.userId === updatedEmployee.userId) {
+            return {
+              ...employee,
+              account: {
+                ...employee.account,
+                role: updatedEmployee.role,
+              },
+            };
+          } else {
+            return employee;
+          }
+        });
+
+        // Log the updated state
+        console.log("Updated State:", {
+          ...state,
+          data: updatedData,
+        });
+
+        // Return a new state object
+        return {
+          ...state,
+          data: updatedData,
+        };
       });
   },
 });
 
-export { fetchApiAllEmployee, fetchApiAddEmployee, fetchApiUpdateEmployee };
+export {
+  fetchApiAllEmployee,
+  fetchApiAddEmployee,
+  fetchApiUpdateEmployee,
+  fetchApiUpdateRole,
+};
 export default EmployeeSlice.reducer;

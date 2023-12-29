@@ -1,5 +1,6 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { DownOutlined, UserOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
@@ -8,23 +9,28 @@ import { Button, Input, Space, Table, Dropdown, Menu, Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchApiAllCompany } from "../redux/CompanySlice";
 import { useNavigate } from "react-router-dom";
-import { getUserLogin, logoutSlice } from "../redux/AuthSlice";
-import CompanyAddForm from "../view/Company/CompanyAddForm";
+
+import { useLocation } from "react-router-dom";
+import { fetchApiSalaryProductDepart } from "../redux/SalaryProductSlice";
 
 // import EmployeeAddForm from "../view/Employee/EmoloyeeAddForm";
 
-const CompanyTable = () => {
+const Salary2Table = () => {
   const navigation = useNavigate();
-  const data = useSelector((state) => state.companies.data);
+  const data = useSelector((state) => state.salariesProduct.data);
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.data);
+  const location = useLocation();
+  const [departments, setDepartments] = useState(
+    location.state && location.state
+  );
 
   const [isEdit, setIsEdit] = useState(false);
   const [editEmployee, setEditEmployee] = useState({});
-  const [hasPerCompany, setHasPerCompany] = useState([]);
 
-  const [editCompany, setEditCompany] = useState({});
-
+  useEffect(() => {
+    // Update the state when the location changes
+    setDepartments(location.state && location.state);
+  }, [location.state]);
   //handle
 
   const handleOk = () => {
@@ -34,42 +40,25 @@ const CompanyTable = () => {
     setIsEdit(false);
   };
   const handleEdit = (record) => {
-    setIsEdit(true);
-    console.log("company:", record);
-    // setEditEmployee(record);
-    setEditCompany(record);
+    console.log(record);
   };
 
   useEffect(() => {}, [editEmployee]);
   const handleDelete = (record) => {
-    navigation("department", { state: record });
+    console.log("Delete:", record.departments);
   };
-  const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
-  const filterPermiss = () => {
-    if (data && user) {
-      const hasPermissionCompanies = data.filter((company) =>
-        company.listPerson.some((person) => person.personId === user.personId)
-      );
-      setHasPerCompany(hasPermissionCompanies);
-    }
-  };
+  //   const uniqueTypes = Array.from(new Set(data.map((item) => item?.type)));
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        dispatch(fetchApiAllCompany());
-        dispatch(getUserLogin);
+        dispatch(fetchApiSalaryProductDepart(departments));
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
     };
-    fetchData().then(() => {
-      filterPermiss();
-    });
-  }, [dispatch, user]);
-
-  useEffect(() => {
-    console.log(hasPerCompany.toString() + "======123213======");
-  }, [hasPerCompany]);
+    fetchData();
+  }, [dispatch]);
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -202,94 +191,109 @@ const CompanyTable = () => {
   const columns = [
     {
       title: "#",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "idSalary",
+      key: "idSalary",
+      width: "5%",
+    },
+
+    {
+      title: "Employee Name",
+      dataIndex: "employee",
+      width: "15%",
+      key: "employee.fullName",
+      ...getColumnSearchProps("employee.fullName"),
+
+      render: (employee) => employee && employee.fullName,
+    },
+    {
+      title: "Phone",
+      dataIndex: "employee",
       width: "10%",
+      key: "employee.phone",
+      ...getColumnSearchProps("employee.phone"),
+
+      render: (employee) => employee && employee.phone,
+    },
+    {
+      title: "Salary",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.salary",
+      ...getColumnSearchProps("employee.salary"),
+
+      render: (employee) => employee && employee.salary,
     },
 
     {
-      title: "Company Name",
-      dataIndex: "companyName",
-      key: "companyName",
-      width: "15%",
-      ...getColumnSearchProps("companyName"),
+      title: "Role",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.account.role.name",
+      render: (employee) => employee && employee.account.role.name,
+      // render: (employee) => employee && employee.account.role.name,
+      // ...getColumnSearchProps("employee.salary"),
     },
     {
-      title: "Address",
-      dataIndex: "companyAddress",
-      key: "companyAddress",
-      width: "15%",
-      ...getColumnSearchProps("companyAddress"),
+      title: "Department",
+      dataIndex: "employee",
+      width: "10%",
+      key: "employee.department.departmentName",
+      render: (employee) => employee && employee.department.departmentName,
+      // ...getColumnSearchProps("employee.salary"),
     },
+    {
+      title: "Month",
+      dataIndex: "date",
+      key: "date",
+      render: (date) => moment(date).format("MM/YYYY"),
 
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      width: "15%",
-      filters: uniqueTypes.map((type) => ({
-        text: type,
-        value: type,
-      })),
-      onFilter: (value, record) => record.type.indexOf(value) === 0,
-    },
-
-    {
-      title: "Acreage",
-      dataIndex: "acreage",
-      key: "acreage",
-      ...getColumnSearchProps("acreage"),
+      //   ...getColumnSearchProps("date"),
     },
     {
-      title: "Build Year",
-      dataIndex: "buildYear",
-      key: "buildYear",
-      ...getColumnSearchProps("buildYear"),
+      title: "unit Price",
+      dataIndex: "unitPrice",
+      key: "unitPrice",
+      ...getColumnSearchProps("unitPrice"),
     },
     {
-      title: "Year Operation",
-      dataIndex: "yearOperation",
-      key: "yearOperation",
-      ...getColumnSearchProps("yearOperation"),
+      title: "Quantity",
+      dataIndex: "numberOfProducts",
+      key: "numberOfProducts",
+      ...getColumnSearchProps("numberOfProducts"),
     },
     {
-      title: "Action",
-      dataIndex: "id",
-      key: "id",
-      render: (text, record) => (
-        <Space size="middle">
-          <Button type="primary" onClick={() => handleEdit(record)}>
-            Edit
-          </Button>
-          <Button
-            style={{ backgroundColor: "green" }}
-            type="primary"
-            onClick={() => handleDelete(record)}
-          >
-            Department
-          </Button>
-        </Space>
+      title: "Sum",
+      dataIndex: "sum",
+      key: "sum",
+      ...getColumnSearchProps("sum"),
+      render: (text) => (
+        <span>
+          {parseFloat(text).toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </span>
       ),
     },
   ];
   return (
     <>
+      {/* <Table columns={columns} backgroundColor="#eee" dataSource={data} /> */}
       <Table
         columns={columns}
-        dataSource={user?.roleId === 3 ? data : hasPerCompany}
+        dataSource={data}
+        headerBg={"#3333"}
+        footerBg="#3333"
       />
-      <Modal
+      {/* <Modal
         title="Edit Employee"
         open={isEdit}
         onOk={handleOk}
         onCancel={handleCancel}
-        footer={null}
       >
-        {/* <EmployeeAddForm editEmployee={editEmployee} /> */}
-
-        <CompanyAddForm onCancel={handleCancel} editCompany={editCompany} />
-      </Modal>
+        <EmployeeAddForm editEmployee={editEmployee} />
+      </Modal> */}
     </>
   );
 };
-export default CompanyTable;
+export default Salary2Table;

@@ -20,11 +20,12 @@ import DepartmentContent from "./Department/DepartmentContent";
 import SalaryContent from "./Salary/SalaryContent";
 import LoginPage from "./Login/Login";
 import TakeOffContent from "./TakeOff/TakeOffContent";
-import { useAuth } from "../../src/AuthContext.js/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserLogin, logoutSlice } from "../redux/AuthSlice";
 import NotFound from "./NotFound/NotFound";
 import { toast } from "react-toastify";
+import ManagerCompany from "./Company/ManagerCompany";
+import SalaryTabs from "./Salary/SalaryTabs";
 
 const { Header, Content, Sider } = Layout;
 
@@ -89,8 +90,8 @@ const HomePage = () => {
   } = theme.useToken();
 
   return (
-    <>
-      <Layout>
+    <div style={{ minHeight: "100vh" }}>
+      <Layout theme="dark">
         <Header
           style={{
             display: "flex",
@@ -118,15 +119,35 @@ const HomePage = () => {
           >
             <a onClick={(e) => e.preventDefault()}>
               <Space>
-                {user && user.fullName}
-                <UserOutlined />
+                {user && (
+                  <>
+                    {user.roleId === 2 ? (
+                      <>
+                        Manager | {user.fullName}
+                        <UserOutlined />
+                      </>
+                    ) : user.roleId === 3 ? (
+                      <>
+                        Admin | {user.fullName}
+                        <UserOutlined />
+                      </>
+                    ) : (
+                      // Handle other roles if needed
+                      <>
+                        Other Role | {user.fullName}
+                        <UserOutlined />
+                      </>
+                    )}
+                  </>
+                )}
               </Space>
             </a>
           </Dropdown>
         </Header>
-        <Layout>
-          <Sider>
+        <Layout theme="dark" style={{ minHeight: "100%" }}>
+          <Sider theme="dark">
             <Menu
+              theme="dark"
               mode="inline"
               defaultSelectedKeys={["1"]}
               defaultOpenKeys={["sub1"]}
@@ -143,8 +164,8 @@ const HomePage = () => {
               </Menu.Item>
             </Menu>
           </Sider>
-          <Layout>
-            <Content>
+          <Layout style={{ minHeight: "89.3vh", height: "92.8vh" }}>
+            <Content style={{ margin: "10px 0 0 30px", maxHeight: "87vh" }}>
               <Routes>
                 <Route path="company" element={<CompanyContent />} />
                 <Route path="employee" element={<EmployeeContent />} exact />
@@ -153,9 +174,11 @@ const HomePage = () => {
                   element={<DepartmentContent />}
                   exact
                 />
+                <Route path="company/salary" element={<SalaryTabs />} exact />
+
                 <Route
-                  path="company/salary"
-                  element={<SalaryContent />}
+                  path="company/managercompany"
+                  element={<ManagerCompany />}
                   exact
                 />
 
@@ -164,13 +187,14 @@ const HomePage = () => {
                   element={<TakeOffContent />}
                   exact
                 />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Content>
           </Layout>
         </Layout>
       </Layout>
-    </>
+    </div>
   );
 };
 

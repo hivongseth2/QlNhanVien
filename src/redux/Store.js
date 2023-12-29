@@ -4,6 +4,7 @@ import CompanySlice from "./CompanySlice";
 import SalarySlice from "./SalarySlice";
 import TakeOffSlice from "./TakeOffSlice";
 import AuthSlice from "./AuthSlice";
+import SalaryProductSlice from "./SalaryProductSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     salaries: SalarySlice,
     takeoffs: TakeOffSlice,
     user: AuthSlice,
+    salariesProduct: SalaryProductSlice,
   },
 });

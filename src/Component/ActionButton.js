@@ -1,15 +1,20 @@
 import { Button, Dropdown, Menu } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserLogin, logoutSlice } from "../redux/AuthSlice";
 
 const ActionButton = ({ record, handleEdit, handleStatusChange, state }) => {
   const [status, setStatus] = useState(state);
-
+  const data = useSelector((state) => state.user.data);
+  const dispatch = useDispatch();
   useEffect(() => {
     // Update the status state when the state prop changes
     setStatus(state);
-    console.log("aaaaaaaaaa", state);
   }, [state]); // Add state as a dependency to useEffect
+  useEffect(() => {
+    dispatch(getUserLogin());
+  }, []);
 
   const getColor = () => {
     switch (status) {
@@ -24,8 +29,13 @@ const ActionButton = ({ record, handleEdit, handleStatusChange, state }) => {
     }
   };
 
+  useEffect(() => {
+    console.log(data, "action button");
+  }, [data]);
+
   const menu = (
     <Menu
+      disabled={data?.roleId !== 3} //
       onClick={({ key }) => {
         setStatus(key);
         handleStatusChange(record, key);

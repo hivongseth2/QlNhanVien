@@ -4,10 +4,11 @@ import { Button, Flex, Modal } from "antd";
 import SalaryTable from "../../table/SalaryTable";
 import { useLocation } from "react-router-dom";
 import SalaryAddModal from "./SalaryAddModal";
+import Salary2Table from "../../table/Salary2Table";
 
-export default function SalaryContent() {
+export default function Salary2Content() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const type = 1;
+  const type = 2;
   const location = useLocation();
   const [departments, setDepartments] = useState(
     location.state && location.state
@@ -29,16 +30,16 @@ export default function SalaryContent() {
   return (
     <div>
       <div style={{ marginTop: 16 }}>
-        <h2>SALARY TIME</h2>
+        <h2>SALARY PRODUCT</h2>
       </div>
       <Button type="primary" onClick={showModal}>
         Add salary
       </Button>
 
       {/* <EmployeeTable /> */}
-      <SalaryTable />
+      <Salary2Table />
       <Modal
-        title="Add Salary Time"
+        title="Add Salary Product"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
